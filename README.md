@@ -64,6 +64,12 @@ whoami((err, name) => {
 
 ## Sandbox
 
+`spawn()` creates a child process, and then uses the [node vm api](https://nodejs.org/api/vm.html) to create a context without access to any of the node APIs.
+
+The context is configured in [loader.js](./loader.js).
+In addition to same basic methods (like `console` functions) the context will include the methods supplied in the `env` options of `spawn()`.
+
+
 ## IPC
 
 The parent and child processes communicate using [muxrpc](npm.im/muxrpc) over STDIO.
