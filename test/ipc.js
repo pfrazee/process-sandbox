@@ -9,7 +9,7 @@ const HELLO_MANIFEST = {
   sayHello: 'async'
 }
 
-tape('spawn - loads target script, and establishes IPC', t => {
+tape('child ipc api works', t => {
   var ps = processSandbox()
   var ping = ps.spawn({ path: pathlib.join(__dirname, 'scripts/ping.js'), manifest: PING_MANIFEST })
   ping.ipcApi.ping('foo', (err, res) => {
@@ -20,7 +20,7 @@ tape('spawn - loads target script, and establishes IPC', t => {
   })
 })
 
-tape('spawn - provides env api', t=>{
+tape('env ipc api works', t=>{
   var wasCalled = false
 
   var ps = processSandbox()
