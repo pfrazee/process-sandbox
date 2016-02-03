@@ -69,6 +69,15 @@ whoami((err, name) => {
 The context is configured in [loader.js](./loader.js).
 In addition to same basic methods (like `console` functions) the context will include the methods supplied in the `env` options of `spawn()`.
 
+**Possible avenues for improvement:**
+
+If some JS were ever able to break its VM context, within its own process or another (via IPC), it would have the same rights as the compromised process.
+We might mitigate this at the OS-level, using the same techniques that browsers use.
+
+From https://chromium.googlesource.com/chromium/src/+/master/docs/linux_sandboxing.md:
+
+ - Linux: `setuid()` and `setgid()`
+ - Linux: [seccomp](https://wiki.mozilla.org/Security/Sandbox/Seccomp)
 
 ## IPC
 
