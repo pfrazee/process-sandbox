@@ -17,7 +17,7 @@ var ipcApiStream = require('./ipc-api-stream')
 //
 
 const SCRIPT_PATH         = process.env.script_path
-const PARENT_IPC_MANIFEST = { /* no methods yet */ }
+const ENV_IPC_MANIFEST    = readObjFromEnvVars('env_manifest')
 const CHILD_IPC_MANIFEST  = readObjFromEnvVars('script_manifest')
 
 // read script
@@ -34,7 +34,7 @@ var vmModule = { exports: {} }
 
 // setup RPC channel with parent process
 var ipcStream = ipcApiStream(process, function(err) { console.error(err); throw 'parent-process ipc stream was killed' })
-var ipcApi = muxrpc(PARENT_IPC_MANIFEST, CHILD_IPC_MANIFEST, msg => msg)(vmModule.exports) // note, we route the requests to the VM's module.exports
+var ipcApi = muxrpc(ENV_IPC_MANIFEST, CHILD_IPC_MANIFEST, msg => msg)(vmModule.exports) // note, we route the requests to the VM's module.exports
 pull(ipcStream, ipcApi.createStream(), ipcStream)
 
 //
@@ -60,7 +60,7 @@ var contextDesc = {
   }
 }
 // mix in methods exposed by the parent environment via IPC
-for (var k in PARENT_IPC_MANIFEST)
+for (var k in ENV_IPC_MANIFEST)
   contextDesc[k] = ipcApi[k]
 
 // launch vm

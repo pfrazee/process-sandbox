@@ -13,9 +13,6 @@ var ipcApiStream = require('./ipc-api-stream')
 const NODE_PATH = process.execPath
 const LOADER = pathlib.join(__dirname, 'loader.js')
 
-const IPC_MANIFEST = {}
-const IPC_API = {}
-
 module.exports = function () {
 
   var api = {}
@@ -25,7 +22,13 @@ module.exports = function () {
   //
   // spawn a new sandboxed child
   //
-  api.spawn = function (path, manifest) {
+  api.spawn = function (opts) {
+    if (!opts || typeof opts !== 'object')
+      throw "spawn() requires an object with {path:}"
+    var path          = opts.path
+    var childManifest = opts.manifest || {}
+    var envManifest   = opts.env && opts.env.manifest || {}
+    var envAPI        = opts.env && opts.env.api || {}
 
     // spawn the process
     var childProcessInstance = childProcess.spawn(NODE_PATH, [LOADER], {
@@ -33,18 +36,20 @@ module.exports = function () {
       cwd: pathlib.dirname(path),
       env: {
         script_path: path,
-        script_manifest: JSON.stringify(manifest||{})
+        script_manifest: JSON.stringify(childManifest),
+        env_manifest: JSON.stringify(envManifest)
       }
     })
     console.log(path, '- started.')
 
     // setup ipc api
     var ipcStream = ipcApiStream(childProcessInstance, function() { console.log(path, '- ipc stream closed.') })
-    var ipcApi = muxrpc(manifest || {}, IPC_MANIFEST, msg => msg)(IPC_API)
+    var ipcApi = muxrpc(childManifest, envManifest, msg => msg)(envAPI)
 
     // add to the registry
     var processDesc = {
       path: path,
+      manifest: childManifest,
       process: childProcessInstance,
       ipcStream: ipcStream,
       ipcApi: ipcApi,
